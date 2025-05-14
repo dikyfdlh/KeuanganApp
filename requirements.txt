@@ -2,3 +2,5 @@ blinker
 Flask
 Werkzeug
 SQLAlchemy
+Flask-SQLAlchemy
+mysql-connector-python
