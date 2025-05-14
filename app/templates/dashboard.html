@@ -1,13 +1,53 @@
-<!-- dashboard.html -->
 {% extends 'base.html' %}
 {% block content %}
-<h2 class="mb-4">Dashboard Rancangan Anggaran Biaya</h2>
-<div class="card">
+<h2 class="mb-4"><i class="fas fa-chart-line me-2"></i>Dashboard Rancangan Anggaran Biaya</h2>
+
+<div class="dashboard-cards">
+    <div class="dashboard-card primary">
+        <div class="card-title">Total Biaya Produk</div>
+        <div class="card-value">Rp.{{ "{:,.0f}".format(total_bt) }}</div>
+        <div class="card-info">
+            <i class="fas fa-box-open me-1"></i> Biaya tetap untuk produksi
+        </div>
+    </div>
+    
+    <div class="dashboard-card warning">
+        <div class="card-title">Total Biaya Barang</div>
+        <div class="card-value">Rp.{{ "{:,.0f}".format(total_bv) }}</div>
+        <div class="card-info">
+            <i class="fas fa-shopping-cart me-1"></i> Biaya variabel untuk barang
+        </div>
+    </div>
+    
+    <div class="dashboard-card success">
+        <div class="card-title">Total Pendapatan</div>
+        <div class="card-value">Rp.{{ "{:,.0f}".format(total_pd) }}</div>
+        <div class="card-info">
+            <i class="fas fa-money-bill-wave me-1"></i> Pendapatan keseluruhan
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-card profit">
+    <div class="card-title">Laba Bersih</div>
+    <div class="card-value">Rp.{{ "{:,.0f}".format(laba) }}</div>
+    <div class="card-info">
+        <i class="fas fa-chart-line me-1"></i> Total pendapatan dikurangi biaya
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi Keuangan</h4>
+    </div>
     <div class="card-body">
-        <p><strong>Total Biaya Tetap:</strong> Rp.{{ "{:,.0f}".format(total_bt) }}</p>
-        <p><strong>Total Biaya Variabel:</strong> Rp.{{ "{:,.0f}".format(total_bv) }}</p>
-        <p><strong>Total Pendapatan:</strong> Rp.{{ "{:,.0f}".format(total_pd) }}</p>
-        <h4 class="text-success"><strong>Laba Bersih:</strong> Rp.{{ "{:,.0f}".format(laba) }}</h4>
+        <p>Dashboard ini menampilkan ringkasan keuangan bisnis Anda. Berikut adalah penjelasan singkat:</p>
+        <ul>
+            <li><strong>Biaya Produk:</strong> Biaya tetap yang dikeluarkan untuk produksi.</li>
+            <li><strong>Biaya Barang:</strong> Biaya variabel yang berubah sesuai dengan volume produksi.</li>
+            <li><strong>Pendapatan:</strong> Total pemasukan dari berbagai sumber.</li>
+            <li><strong>Laba Bersih:</strong> Selisih antara pendapatan dan total biaya (tetap dan variabel).</li>
+        </ul>
     </div>
 </div>
 {% endblock %}

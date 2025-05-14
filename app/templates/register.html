@@ -1,21 +1,47 @@
-<!-- templates/register.html -->
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - Aplikasi Keuangan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
 </head>
-<body>
-<div class="auth-form">
-    <h2>Daftar Akun</h2>
-    <form method="POST">
-        <input type="text" name="namalengkap" placeholder="Nama Lengkap" required>
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Daftar</button>
-    </form>
-    <p>Sudah punya akun? <a href="{{ url_for('main.login') }}">Login di sini</a></p>
-</div>
+<body class="auth-container">
+    <div class="auth-form">
+        <h2><i class="fas fa-user-plus me-2"></i>Daftar Akun</h2>
+        
+        <!-- Notifikasi Flash -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="input-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" name="namalengkap" placeholder="Nama Lengkap" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-user-tag input-icon"></i>
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-key input-icon"></i>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit">
+                <i class="fas fa-user-plus me-2"></i>Daftar
+            </button>
+        </form>
+        <p>Sudah punya akun? <a href="{{ url_for('main.login') }}">Login di sini</a></p>
+    </div>
 </body>
 </html>

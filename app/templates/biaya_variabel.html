@@ -1,35 +1,53 @@
-<!-- biaya_variabel.html -->
 {% extends 'base.html' %}
 {% block content %}
-<h2 class="mb-4">Biaya Variabel</h2>
-<form method="POST">
-    <div class="mb-3">
-        <label class="form-label">Nama Barang</label>
-        <input type="text" name="nama" class="form-control" required>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Harga (Rp)</label>
-        <input type="number" name="jumlah" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Tambah</button>
-</form>
+<h2 class="mb-4"><i class="fas fa-shopping-cart me-2"></i>Biaya Barang</h2>
 
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr><th>Nama</th><th>Harga (Rp)</th><th>Oleh</th><th>Aksi</th></tr>
-    </thead>
-    <tbody>
-        {% for item in data %}
-        <tr>
-            <td>{{ item.nama }}</td>
-            <td>{{ "{:,.0f}".format(item.jumlah) }}</td>
-            <td>{{ session.get('namalengkap') }}</td>
-            <td>
-                <a href="{{ url_for('main.editBiayaVar', id=item.id) }}" class="btn btn-warning">Edit</a>
-                <a href="{{ url_for('main.hapusBiayaVar', id=item.id) }}" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">Hapus</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="form-container">
+    <h4 class="form-title"><i class="fas fa-plus-circle me-2"></i>Tambah Biaya Barang</h4>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Nama Barang</label>
+            <input type="text" name="nama" class="form-control" placeholder="Masukkan nama barang" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Harga (Rp)</label>
+            <input type="number" name="jumlah" class="form-control" placeholder="Masukkan harga" required>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Tambah
+        </button>
+    </form>
+</div>
+
+<div class="table-container">
+    <h4 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Biaya Barang</h4>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th><i class="fas fa-tag me-1"></i> Nama</th>
+                <th><i class="fas fa-money-bill me-1"></i> Harga (Rp)</th>
+                <th><i class="fas fa-user me-1"></i> Oleh</th>
+                <th><i class="fas fa-cogs me-1"></i> Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item.nama }}</td>
+                <td>{{ "{:,.0f}".format(item.jumlah) }}</td>
+                <td>{{ session.get('namalengkap') }}</td>
+                <td>
+                    <a href="{{ url_for('main.editBiayaVar', id=item.id) }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                    <a href="{{ url_for('main.hapusBiayaVar', id=item.id) }}" class="btn btn-danger btn-sm" 
+                       onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">
+                        <i class="fas fa-trash me-1"></i> Hapus
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
