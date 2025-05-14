@@ -4,3 +4,5 @@ Werkzeug
 SQLAlchemy
 Flask-SQLAlchemy
 mysql-connector-python
+pymysql
+gunicorn
