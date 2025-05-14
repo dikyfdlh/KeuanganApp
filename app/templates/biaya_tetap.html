@@ -1,0 +1,35 @@
+<!-- biaya_tetap.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Biaya Tetap</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Nama Produk</label>
+        <input type="text" name="nama" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Harga (Rp)</label>
+        <input type="number" name="jumlah" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Tambah</button>
+</form>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr><th>Nama</th><th>Harga (Rp)</th><th>Oleh</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+        {% for item in data %}
+        <tr>
+            <td>{{ item.nama }}</td>
+            <td>{{ "{:,.0f}".format(item.jumlah) }}</td>
+            <td>{{ session.get('namalengkap') }}</td>
+            <td>
+                <a href="{{ url_for('main.editBiayaTTP', id=item.id) }}" class="btn btn-warning">Edit</a>
+                <a href="{{ url_for('main.hapusBiayaTTP', id=item.id) }}" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">Hapus</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

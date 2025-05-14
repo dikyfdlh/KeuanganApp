@@ -1,0 +1,21 @@
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+</head>
+<body>
+<div class="auth-form">
+    <h2>Daftar Akun</h2>
+    <form method="POST">
+        <input type="text" name="namalengkap" placeholder="Nama Lengkap" required>
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Daftar</button>
+    </form>
+    <p>Sudah punya akun? <a href="{{ url_for('main.login') }}">Login di sini</a></p>
+</div>
+</body>
+</html>

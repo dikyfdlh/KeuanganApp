@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Aplikasi Keuangan</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/images/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/assets/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="username" style="text-align: center;">Selamat Datang <p style="font-weight: 100;">{{ session.get('namalengkap') }}</p></h1>
+        </div>
+        <h3>Rancangan Anggaran Biaya</h3>
+        <a href="{{ url_for('main.dashboard') }}" class="{% if request.path == '/dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{{ url_for('main.biaya_tetap') }}" class="{% if request.path.startswith('/biaya-tetap') %}active{% endif %}">Biaya Produk</a>
+        <a href="{{ url_for('main.biaya_variabel') }}" class="{% if request.path.startswith('/biaya-variabel') %}active{% endif %}">Biaya Barang</a>
+        <a href="{{ url_for('main.pendapatan') }}" class="{% if request.path.startswith('/pendapatan') %}active{% endif %}">Pendapatan</a>
+
+        <!-- Logout tombol di bagian bawah sidebar -->
+        <div class="logout-container">
+            <a href="" class="logout-link">Panel Admin</a>
+            <a href="{{ url_for('main.logout') }}" class="logout-link">Logout</a>
+        </div>
+    </div>
+    <div class="main-content">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

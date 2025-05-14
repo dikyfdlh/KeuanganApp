@@ -1,0 +1,29 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+</head>
+<body>
+<div class="auth-form">
+    <h2>Login</h2>
+
+    <!-- Notifikasi Flash -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}
+        {% endblock %}
+    
+    <form method="POST">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p>Belum punya akun? <a style="font-weight: bold; color: #3059d5;" href="{{ url_for('main.register') }}">Daftar di sini</a></p>
+</div>
+</body>
+</html>

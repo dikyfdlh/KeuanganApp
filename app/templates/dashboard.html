@@ -1,0 +1,13 @@
+<!-- dashboard.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Dashboard Rancangan Anggaran Biaya</h2>
+<div class="card">
+    <div class="card-body">
+        <p><strong>Total Biaya Tetap:</strong> Rp.{{ "{:,.0f}".format(total_bt) }}</p>
+        <p><strong>Total Biaya Variabel:</strong> Rp.{{ "{:,.0f}".format(total_bv) }}</p>
+        <p><strong>Total Pendapatan:</strong> Rp.{{ "{:,.0f}".format(total_pd) }}</p>
+        <h4 class="text-success"><strong>Laba Bersih:</strong> Rp.{{ "{:,.0f}".format(laba) }}</h4>
+    </div>
+</div>
+{% endblock %}
