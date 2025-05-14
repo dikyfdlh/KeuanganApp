@@ -38,4 +38,4 @@ Aplikasi Rencana Anggaran Biaya (RAB) Usaha adalah sebuah platform berbasis web 
 
 - Autentikasi: Flask-Login
 
-- Lainnya: Jinja2, Flask-Migrate
+- Lainnya: Jinja2, Flask-Migrate# KeuanganApp
