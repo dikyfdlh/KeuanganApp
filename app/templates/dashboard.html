@@ -2,37 +2,197 @@
 {% block content %}
 <h2 class="mb-4"><i class="fas fa-chart-line me-2"></i>Dashboard Rancangan Anggaran Biaya</h2>
 
-<div class="dashboard-cards">
-    <div class="dashboard-card primary">
-        <div class="card-title">Total Biaya Produk</div>
-        <div class="card-value">Rp.{{ "{:,.0f}".format(total_bt) }}</div>
-        <div class="card-info">
-            <i class="fas fa-box-open me-1"></i> Biaya tetap untuk produksi
+<!-- Ringkasan Keuangan -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card primary">
+            <div class="card-title">Total Biaya Produk</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(total_bt) }}</div>
+            <div class="card-info">
+                <i class="fas fa-box-open me-1"></i> Realisasi: {{ "{:.1f}".format(realisasi_bt if realisasi_bt is not none else 0) }}% dari anggaran
+            </div>
         </div>
     </div>
     
-    <div class="dashboard-card warning">
-        <div class="card-title">Total Biaya Barang</div>
-        <div class="card-value">Rp.{{ "{:,.0f}".format(total_bv) }}</div>
-        <div class="card-info">
-            <i class="fas fa-shopping-cart me-1"></i> Biaya variabel untuk barang
+    <div class="col-md-3">
+        <div class="dashboard-card warning">
+            <div class="card-title">Total Biaya Barang</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(total_bv) }}</div>
+            <div class="card-info">
+                <i class="fas fa-shopping-cart me-1"></i> Realisasi: {{ "{:.1f}".format(realisasi_bv if realisasi_bv is not none else 0) }}% dari anggaran
+            </div>
         </div>
     </div>
     
-    <div class="dashboard-card success">
-        <div class="card-title">Total Pendapatan</div>
-        <div class="card-value">Rp.{{ "{:,.0f}".format(total_pd) }}</div>
-        <div class="card-info">
-            <i class="fas fa-money-bill-wave me-1"></i> Pendapatan keseluruhan
+    <div class="col-md-3">
+        <div class="dashboard-card success">
+            <div class="card-title">Total Pendapatan</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(total_pd) }}</div>
+            <div class="card-info">
+                <i class="fas fa-money-bill-wave me-1"></i> Realisasi: {{ "{:.1f}".format(realisasi_pd if realisasi_pd is not none else 0) }}% dari anggaran
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="dashboard-card profit">
+            <div class="card-title">Laba Bersih</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(laba) }}</div>
+            <div class="card-info">
+                <i class="fas fa-chart-line me-1"></i> Realisasi: {{ "{:.1f}".format(realisasi_laba if realisasi_laba is not none else 0) }}% dari anggaran
+            </div>
         </div>
     </div>
 </div>
 
-<div class="dashboard-card profit">
-    <div class="card-title">Laba Bersih</div>
-    <div class="card-value">Rp.{{ "{:,.0f}".format(laba) }}</div>
-    <div class="card-info">
-        <i class="fas fa-chart-line me-1"></i> Total pendapatan dikurangi biaya
+<!-- Grafik Perbandingan Anggaran vs Realisasi -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4><i class="fas fa-chart-bar me-2"></i>Perbandingan Anggaran vs Realisasi</h4>
+    </div>
+    <div class="card-body">
+        <canvas id="anggaranRealisasiChart" height="250"></canvas>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Ringkasan Cash Flow -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-money-bill-transfer me-2"></i>Cash Flow Terbaru</h4>
+                <a href="{{ url_for('main.cashflow') }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-eye me-1"></i> Lihat Semua
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h5>Pemasukan</h5>
+                                <h3>Rp.{{ "{:,.0f}".format(total_pemasukan) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h5>Pengeluaran</h5>
+                                <h3>Rp.{{ "{:,.0f}".format(total_pengeluaran) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card {% if saldo_cashflow >= 0 %}bg-success{% else %}bg-warning{% endif %} text-white">
+                            <div class="card-body text-center">
+                                <h5>Saldo</h5>
+                                <h3>Rp.{{ "{:,.0f}".format(saldo_cashflow) }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Jenis</th>
+                                <th>Kategori</th>
+                                <th>Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in recent_cashflow %}
+                            <tr>
+                                <td>{{ format_datetime(item.tanggal, '%d-%m-%Y') }}</td>
+                                <td>
+                                    {% if item.jenis == 'pemasukan' %}
+                                    <span class="badge bg-success">Pemasukan</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Pengeluaran</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.kategori }}</td>
+                                <td class="text-end">Rp.{{ "{:,.0f}".format(item.jumlah) }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not recent_cashflow %}
+                            <tr>
+                                <td colspan="4" class="text-center">Belum ada data cash flow.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ringkasan Produk -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-box me-2"></i>Ringkasan Produk</h4>
+                <a href="{{ url_for('main.manajemen_produk') }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-eye me-1"></i> Lihat Semua
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h5>Total Produk</h5>
+                                <h3>{{ total_produk }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5>Total Stok</h5>
+                                <h3>{{ total_stok }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card {% if produk_habis > 0 %}bg-danger{% else %}bg-secondary{% endif %} text-white">
+                            <div class="card-body text-center">
+                                <h5>Stok Habis</h5>
+                                <h3>{{ produk_habis }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5 class="mb-3">Produk Terlaris</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nama Produk</th>
+                                <th class="text-end">Jumlah Terjual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in top_products %}
+                            <tr>
+                                <td>{{ product.nama }}</td>
+                                <td class="text-end">{{ product.total_sold }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not top_products %}
+                            <tr>
+                                <td colspan="2" class="text-center">Belum ada data penjualan produk.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -47,7 +207,80 @@
             <li><strong>Biaya Barang:</strong> Biaya variabel yang berubah sesuai dengan volume produksi.</li>
             <li><strong>Pendapatan:</strong> Total pemasukan dari berbagai sumber.</li>
             <li><strong>Laba Bersih:</strong> Selisih antara pendapatan dan total biaya (tetap dan variabel).</li>
+            <li><strong>Realisasi:</strong> Persentase realisasi dibandingkan dengan anggaran yang telah ditetapkan.</li>
         </ul>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Tips:</strong> Pantau perbandingan anggaran dan realisasi secara berkala untuk memastikan bisnis Anda berjalan sesuai rencana keuangan.
+        </div>
     </div>
 </div>
+
+<!-- Script untuk Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data untuk grafik perbandingan anggaran vs realisasi
+    const anggaranRealisasiData = {
+        labels: {{ anggaran_realisasi.labels|tojson }},
+        datasets: [
+            {
+                label: 'Anggaran',
+                data: {{ anggaran_realisasi.anggaran|tojson }},
+                backgroundColor: 'rgba(76, 201, 240, 0.5)',
+                borderColor: 'rgba(76, 201, 240, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Realisasi',
+                data: {{ anggaran_realisasi.realisasi|tojson }},
+                backgroundColor: 'rgba(67, 97, 238, 0.5)',
+                borderColor: 'rgba(67, 97, 238, 1)',
+                borderWidth: 1
+            }
+        ]
+    };
+    
+    // Render grafik perbandingan anggaran vs realisasi
+    const anggaranRealisasiChart = new Chart(
+        document.getElementById('anggaranRealisasiChart'),
+        {
+            type: 'bar',
+            data: anggaranRealisasiData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Perbandingan Anggaran vs Realisasi'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += 'Rp.' + context.raw.toLocaleString('id-ID');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp.' + value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+</script>
 {% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-user-edit me-2"></i>Edit Pengguna</h2>
+
+<div class="form-container">
+    <h4 class="form-title"><i class="fas fa-pen me-2"></i>Ubah Data Pengguna</h4>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" name="namalengkap" class="form-control" value="{{ user.namalengkap }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                <small class="text-muted">Username tidak dapat diubah</small>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
+                <input type="password" name="password" class="form-control" placeholder="Password baru">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-control">
+                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+            </select>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Simpan
+            </button>
+            <a href="{{ url_for('main.manajemen_pengguna') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Pada halaman ini Anda dapat mengubah data pengguna.</p>
+        <ul>
+            <li><strong>Username:</strong> Username tidak dapat diubah karena digunakan sebagai identitas unik pengguna.</li>
+            <li><strong>Password:</strong> Kosongkan field password jika tidak ingin mengubah password pengguna.</li>
+            <li><strong>Role:</strong> Ubah role pengguna sesuai dengan kebutuhan.</li>
+        </ul>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Tips:</strong> Pastikan untuk memberikan role yang sesuai dengan tanggung jawab pengguna.
+        </div>
+    </div>
+</div>
+{% endblock %}

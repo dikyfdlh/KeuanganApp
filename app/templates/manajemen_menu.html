@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-bars me-2"></i>Manajemen Menu</h2>
+
+<div class="form-container">
+    <h4 class="form-title"><i class="fas fa-plus-circle me-2"></i>Tambah Menu Baru</h4>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nama Menu</label>
+                <input type="text" name="nama" class="form-control" placeholder="Nama menu" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">URL</label>
+                <input type="text" name="url" class="form-control" placeholder="URL menu (contoh: /dashboard)">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Icon (Font Awesome)</label>
+                <input type="text" name="icon" class="form-control" placeholder="Contoh: fas fa-home">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Menu Parent</label>
+                <select name="parent_id" class="form-control">
+                    <option value="">-- Tidak Ada Parent --</option>
+                    {% for menu in parent_menus %}
+                    <option value="{{ menu.id }}">{{ menu.nama }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Urutan</label>
+                <input type="number" name="urutan" class="form-control" value="0" min="0">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Tambah Menu
+        </button>
+    </form>
+</div>
+
+<div class="table-container">
+    <h4 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Menu</h4>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>URL</th>
+                <th>Icon</th>
+                <th>Parent</th>
+                <th>Urutan</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for menu in menus %}
+            <tr>
+                <td>
+                    {% if menu.parent_id %}
+                    <span class="ms-3">└ </span>
+                    {% endif %}
+                    {{ menu.nama }}
+                </td>
+                <td>{{ menu.url }}</td>
+                <td>
+                    {% if menu.icon %}
+                    <i class="{{ menu.icon }}"></i> {{ menu.icon }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if menu.parent %}
+                    {{ menu.parent.nama }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>{{ menu.urutan }}</td>
+                <td>
+                    {% if menu.is_active %}
+                    <span class="badge bg-success">Aktif</span>
+                    {% else %}
+                    <span class="badge bg-danger">Tidak Aktif</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('main.edit_menu', id=menu.id) }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                    <a href="{{ url_for('main.hapus_menu', id=menu.id) }}" class="btn btn-danger btn-sm" 
+                       onclick="return confirm('Apakah Anda yakin ingin menghapus menu ini?')">
+                        <i class="fas fa-trash me-1"></i> Hapus
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Halaman ini digunakan untuk mengelola menu yang ditampilkan di sidebar aplikasi.</p>
+        <ul>
+            <li><strong>Nama Menu:</strong> Nama yang akan ditampilkan di sidebar.</li>
+            <li><strong>URL:</strong> Alamat yang akan dibuka ketika menu diklik.</li>
+            <li><strong>Icon:</strong> Icon Font Awesome yang akan ditampilkan di samping nama menu.</li>
+            <li><strong>Menu Parent:</strong> Jika menu ini adalah sub-menu, pilih menu parent-nya.</li>
+            <li><strong>Urutan:</strong> Urutan menu dalam sidebar (angka lebih kecil akan ditampilkan lebih dulu).</li>
+            <li><strong>Status:</strong> Menu aktif akan ditampilkan di sidebar, menu tidak aktif tidak akan ditampilkan.</li>
+        </ul>
+        
+        <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian:</strong> Menu yang memiliki sub-menu tidak dapat dihapus. Hapus semua sub-menu terlebih dahulu.
+        </div>
+    </div>
+</div>
+{% endblock %}

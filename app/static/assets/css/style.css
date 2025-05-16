@@ -204,7 +204,7 @@ body {
 }
 
 .dashboard-card.profit {
-  background: linear-gradient(135deg, #4cc9f0, #4361ee);
+  background: linear-gradient(115deg,  #45b7da, #4361ee, #000);
   color: white;
 }
 

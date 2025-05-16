@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-chart-line me-2"></i>Analisa Penjualan</h2>
+
+<div class="dashboard-cards">
+    <div class="dashboard-card primary">
+        <div class="card-title">Total Biaya Produk</div>
+        <div class="card-value">Rp.{{ "{:,.0f}".format(total_bt) }}</div>
+        <div class="card-info">
+            <i class="fas fa-box-open me-1"></i> Biaya tetap untuk produksi
+        </div>
+    </div>
+    
+    <div class="dashboard-card warning">
+        <div class="card-title">Total Biaya Barang</div>
+        <div class="card-value">Rp.{{ "{:,.0f}".format(total_bv) }}</div>
+        <div class="card-info">
+            <i class="fas fa-shopping-cart me-1"></i> Biaya variabel untuk barang
+        </div>
+    </div>
+    
+    <div class="dashboard-card success">
+        <div class="card-title">Total Pendapatan</div>
+        <div class="card-value">Rp.{{ "{:,.0f}".format(total_pd) }}</div>
+        <div class="card-info">
+            <i class="fas fa-money-bill-wave me-1"></i> Pendapatan keseluruhan
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-card profit">
+    <div class="card-title">Laba Bersih</div>
+    <div class="card-value">Rp.{{ "{:,.0f}".format(laba) }}</div>
+    <div class="card-info">
+        <i class="fas fa-chart-line me-1"></i> Total pendapatan dikurangi biaya
+    </div>
+</div>
+
+<!-- Grafik Penjualan Bulanan -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-chart-bar me-2"></i>Grafik Penjualan Bulanan</h4>
+    </div>
+    <div class="card-body">
+        <canvas id="monthlySalesChart" height="300"></canvas>
+    </div>
+</div>
+
+<!-- Perbandingan Pendapatan vs Biaya dan Grafik Bantuan -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-balance-scale me-2"></i>Analisis Keuangan</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Perbandingan Pendapatan vs Biaya (Lebih Kecil) -->
+            <div class="col-md-5">
+                <h5 class="text-center mb-3">Perbandingan Pendapatan vs Biaya</h5>
+                <canvas id="incomeExpenseChart" height="250"></canvas>
+            </div>
+            
+            <!-- Grafik Bantuan di Sebelah Kanan -->
+            <div class="col-md-7">
+                <h5 class="text-center mb-3">Tren Laba Bersih</h5>
+                <canvas id="profitTrendChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Produk Terlaris -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-trophy me-2"></i>Produk Terlaris</h4>
+    </div>
+    <div class="card-body">
+        {% if top_products %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Nama Produk</th>
+                        <th>Jumlah Terjual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in top_products %}
+                    <tr>
+                        <td>{{ product.nama }}</td>
+                        <td>{{ product.total_sold }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center">Belum ada data penjualan produk.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Rasio Keuangan -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-percentage me-2"></i>Rasio Keuangan</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="financialRatioChart" height="250"></canvas>
+            </div>
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Rasio</th>
+                                <th>Nilai</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Margin Laba</td>
+                                <td>
+                                    {% if total_pd > 0 %}
+                                        {{ "{:.2f}".format((laba / total_pd) * 100) }}%
+                                    {% else %}
+                                        0.00%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if total_pd > 0 and (laba / total_pd) * 100 >= 20 %}
+                                        <span class="badge bg-success">Baik</span>
+                                    {% elif total_pd > 0 and (laba / total_pd) * 100 >= 10 %}
+                                        <span class="badge bg-warning">Sedang</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Perlu Perhatian</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rasio Biaya Tetap</td>
+                                <td>
+                                    {% if total_pd > 0 %}
+                                        {{ "{:.2f}".format((total_bt / total_pd) * 100) }}%
+                                    {% else %}
+                                        0.00%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if total_pd > 0 and (total_bt / total_pd) * 100 <= 30 %}
+                                        <span class="badge bg-success">Baik</span>
+                                    {% elif total_pd > 0 and (total_bt / total_pd) * 100 <= 50 %}
+                                        <span class="badge bg-warning">Sedang</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Perlu Perhatian</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Rasio Biaya Variabel</td>
+                                <td>
+                                    {% if total_pd > 0 %}
+                                        {{ "{:.2f}".format((total_bv / total_pd) * 100) }}%
+                                    {% else %}
+                                        0.00%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if total_pd > 0 and (total_bv / total_pd) * 100 <= 40 %}
+                                        <span class="badge bg-success">Baik</span>
+                                    {% elif total_pd > 0 and (total_bv / total_pd) * 100 <= 60 %}
+                                        <span class="badge bg-warning">Sedang</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Perlu Perhatian</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informasi Keuangan -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi Keuangan</h4>
+    </div>
+    <div class="card-body">
+        <p>Dashboard ini menampilkan ringkasan keuangan bisnis Anda. Berikut adalah penjelasan singkat:</p>
+        <ul>
+            <li><strong>Biaya Produk:</strong> Biaya tetap yang dikeluarkan untuk produksi.</li>
+            <li><strong>Biaya Barang:</strong> Biaya variabel yang berubah sesuai dengan volume produksi.</li>
+            <li><strong>Pendapatan:</strong> Total pemasukan dari berbagai sumber.</li>
+            <li><strong>Laba Bersih:</strong> Selisih antara pendapatan dan total biaya (tetap dan variabel).</li>
+        </ul>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Tips:</strong> Pantau perbandingan pendapatan dan biaya secara berkala untuk memastikan bisnis Anda tetap menguntungkan.
+        </div>
+    </div>
+</div>
+
+<!-- Script untuk Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data untuk grafik penjualan bulanan
+    const monthlyData = {
+        labels: [{% for item in monthly_sales %}'{{ item.month }}',{% endfor %}],
+        datasets: [{
+            label: 'Penjualan Bulanan',
+            data: [{% for item in monthly_sales %}{{ item.sales }},{% endfor %}],
+            backgroundColor: 'rgba(67, 97, 238, 0.2)',
+            borderColor: 'rgba(67, 97, 238, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+        }]
+    };
+    
+    // Data untuk grafik pendapatan vs biaya
+    const incomeExpenseData = {
+        labels: ['Pendapatan', 'Biaya Tetap', 'Biaya Variabel'],
+        datasets: [{
+            data: [{{ income_expense.pendapatan }}, {{ income_expense.biaya_tetap }}, {{ income_expense.biaya_variabel }}],
+            backgroundColor: [
+                'rgba(76, 201, 240, 0.7)',
+                'rgba(67, 97, 238, 0.7)',
+                'rgba(247, 37, 133, 0.7)'
+            ],
+            borderColor: [
+                'rgba(76, 201, 240, 1)',
+                'rgba(67, 97, 238, 1)',
+                'rgba(247, 37, 133, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    // Data untuk grafik tren laba bersih (grafik bantuan)
+    const profitTrendData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
+        datasets: [
+            {
+                label: 'Pendapatan',
+                data: [
+                    {% for item in monthly_sales %}
+                        {{ item.sales }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(76, 201, 240, 0.2)',
+                borderColor: 'rgba(76, 201, 240, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Biaya',
+                data: [
+                    {% for item in monthly_sales %}
+                        {{ (item.sales * 0.7)|round }}, // Simulasi biaya sebagai 70% dari pendapatan
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(247, 37, 133, 0.2)',
+                borderColor: 'rgba(247, 37, 133, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Laba',
+                data: [
+                    {% for item in monthly_sales %}
+                        {{ (item.sales * 0.3)|round }}, // Simulasi laba sebagai 30% dari pendapatan
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(58, 12, 163, 0.2)',
+                borderColor: 'rgba(58, 12, 163, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }
+        ]
+    };
+    
+    // Data untuk grafik rasio keuangan
+    const financialRatioData = {
+        labels: ['Margin Laba', 'Rasio Biaya Tetap', 'Rasio Biaya Variabel'],
+        datasets: [{
+            label: 'Persentase (%)',
+            data: [
+                {{ "{:.2f}".format((laba / total_pd) * 100) if total_pd > 0 else 0 }},
+                {{ "{:.2f}".format((total_bt / total_pd) * 100) if total_pd > 0 else 0 }},
+                {{ "{:.2f}".format((total_bv / total_pd) * 100) if total_pd > 0 else 0 }}
+            ],
+            backgroundColor: [
+                'rgba(58, 12, 163, 0.7)',
+                'rgba(67, 97, 238, 0.7)',
+                'rgba(247, 37, 133, 0.7)'
+            ],
+            borderColor: [
+                'rgba(58, 12, 163, 1)',
+                'rgba(67, 97, 238, 1)',
+                'rgba(247, 37, 133, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    // Render grafik penjualan bulanan
+    const monthlySalesChart = new Chart(
+        document.getElementById('monthlySalesChart'),
+        {
+            type: 'line',
+            data: monthlyData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Penjualan Bulanan'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp.' + value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+    
+    // Render grafik pendapatan vs biaya (lebih kecil)
+    const incomeExpenseChart = new Chart(
+        document.getElementById('incomeExpenseChart'),
+        {
+            type: 'pie',
+            data: incomeExpenseData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += 'Rp.' + context.raw.toLocaleString('id-ID');
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+    
+    // Render grafik tren laba bersih (grafik bantuan)
+    const profitTrendChart = new Chart(
+        document.getElementById('profitTrendChart'),
+        {
+            type: 'line',
+            data: profitTrendData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += 'Rp.' + context.raw.toLocaleString('id-ID');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp.' + value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+    
+    // Render grafik rasio keuangan
+    const financialRatioChart = new Chart(
+        document.getElementById('financialRatioChart'),
+        {
+            type: 'bar',
+            data: financialRatioData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.raw.toFixed(2) + '%';
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+</script>
+{% endblock %}

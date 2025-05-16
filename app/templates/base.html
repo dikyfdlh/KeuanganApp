@@ -14,24 +14,44 @@
         <div class="sidebar-header">
             <h1 class="username">Selamat Datang <p>{{ session.get('namalengkap') }}</p></h1>
         </div>
-        <h3><i class="fas fa-chart-pie me-2"></i> Menu Utama</h3>
+        <h3><i class=""></i> Menu Utama</h3>
         <a href="{{ url_for('main.dashboard') }}" class="{% if request.path == '/dashboard' %}active{% endif %}">
-            <i class="fas fa-tachometer-alt me-2"></i> <span>Dashboard</span>
+            <i class="fas fa-tachometer-alt me-2"></i><span>Dashboard</span>
         </a>
-        <a href="{{ url_for('main.biaya_tetap') }}" class="{% if request.path.startswith('/biaya-tetap') %}active{% endif %}">
-            <i class="fas fa-box-open me-2"></i> <span>Biaya Produk</span>
+        <h3><i class=""></i> Menu Keuangan</h3>
+        <a href="{{ url_for('main.cashflow') }}" class="{% if request.path.startswith('/cashflow') %}active{% endif %}">
+            <i class="fas fa-money-bill-transfer me-2"></i><span>Cash Flow</span>
+        </a>
+        <h3><i class=""></i> Menu Persiapan</h3>
+        <!-- <a href="{{ url_for('main.analisa_penjualan') }}" class="{% if request.path.startswith('/analisa-penjualan') %}active{% endif %}">
+            <i class="fas fa-chart-bar me-2"></i><span>Analisa Penjualan</span>
+        </a> -->
+        <a href="{{ url_for('main.pendapatan') }}" class="{% if request.path.startswith('/pendapatan') %}active{% endif %}">
+            <i class="fas fa-money-bill-wave me-2"></i><span>Pendapatan</span>
         </a>
         <a href="{{ url_for('main.biaya_variabel') }}" class="{% if request.path.startswith('/biaya-variabel') %}active{% endif %}">
-            <i class="fas fa-shopping-cart me-2"></i> <span>Biaya Barang</span>
+            <i class="fas fa-shopping-cart me-2"></i><span>Biaya Barang</span>
         </a>
-        <a href="{{ url_for('main.pendapatan') }}" class="{% if request.path.startswith('/pendapatan') %}active{% endif %}">
-            <i class="fas fa-money-bill-wave me-2"></i> <span>Pendapatan</span>
+        <a href="{{ url_for('main.biaya_tetap') }}" class="{% if request.path.startswith('/biaya-tetap') %}active{% endif %}">
+            <i class="fas fa-box-open me-2"></i><span>Biaya Produk</span>
         </a>
+        <a href="{{ url_for('main.manajemen_produk') }}" class="{% if request.path.startswith('/daftar-produk') %}active{% endif %}">
+            <i class="fas fa-list me-2"></i><span>Manajemen Produk</span>
+        </a>
+        {% if session.get('role') == 'admin' %}
+        <h3><i class=""></i> Menu Admin</h3>
+        <a href="{{ url_for('main.manajemen_pengguna') }}" class="{% if request.path.startswith('/manajemen-pengguna') %}active{% endif %}">
+            <i class="fas fa-user me-2"></i><span>Manajemen Pengguna</span>
+        </a>
+        <a href="{{ url_for('main.manajemen_menu') }}" class="{% if request.path.startswith('/manajemen-menu') %}active{% endif %}">
+            <i class="fas fa-bars me-2"></i><span>Manajemen Menu</span>
+        </a>
+        {% endif %}
 
         <!-- Logout tombol di bagian bawah sidebar -->
         <div class="logout-container">
             <a href="" class="logout-link">
-                <i class="fas fa-user-shield me-2"></i> <span>Panel Admin</span>
+                <i class="fas fa-arrow-left me-2"></i> <span>Panel User</span>
             </a>
             <a href="{{ url_for('main.logout') }}" class="logout-link">
                 <i class="fas fa-sign-out-alt me-2"></i> <span>Logout</span>

@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-chart-pie me-2"></i>Laporan Cash Flow</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card primary">
+            <div class="card-title">Total Pemasukan</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(total_pemasukan) }}</div>
+            <div class="card-info">
+                <i class="fas fa-arrow-up me-1"></i> Periode {{ start_date_display }} s/d {{ end_date_display }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card warning">
+            <div class="card-title">Total Pengeluaran</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(total_pengeluaran) }}</div>
+            <div class="card-info">
+                <i class="fas fa-arrow-down me-1"></i> Periode {{ start_date_display }} s/d {{ end_date_display }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card {% if saldo >= 0 %}success{% else %}danger{% endif %}">
+            <div class="card-title">Saldo</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(saldo) }}</div>
+            <div class="card-info">
+                <i class="fas fa-balance-scale me-1"></i> Pemasukan - Pengeluaran
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Periode</h4>
+                <a href="{{ url_for('main.cashflow') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-list me-1"></i> Kembali ke Cash Flow
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('main.laporan_cashflow') }}" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tanggal Mulai</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tanggal Akhir</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafik Perbandingan Pemasukan dan Pengeluaran -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4><i class="fas fa-chart-bar me-2"></i>Grafik Perbandingan Pemasukan dan Pengeluaran</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="cashflowPieChart" height="300"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="cashflowBarChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rincian per Kategori -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-arrow-up me-2"></i>Rincian Pemasukan per Kategori</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Kategori</th>
+                                <th class="text-end">Jumlah (Rp)</th>
+                                <th class="text-end">Persentase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for kategori, jumlah in kategori_pemasukan.items() %}
+                            <tr>
+                                <td>{{ kategori }}</td>
+                                <td class="text-end">{{ "{:,.0f}".format(jumlah) }}</td>
+                                <td class="text-end">
+                                    {% if total_pemasukan > 0 %}
+                                    {{ "{:.2f}".format((jumlah / total_pemasukan) * 100) }}%
+                                    {% else %}
+                                    0.00%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not kategori_pemasukan %}
+                            <tr>
+                                <td colspan="3" class="text-center">Tidak ada data pemasukan untuk periode ini.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-primary">
+                                <th>Total</th>
+                                <th class="text-end">{{ "{:,.0f}".format(total_pemasukan) }}</th>
+                                <th class="text-end">100.00%</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-arrow-down me-2"></i>Rincian Pengeluaran per Kategori</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Kategori</th>
+                                <th class="text-end">Jumlah (Rp)</th>
+                                <th class="text-end">Persentase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for kategori, jumlah in kategori_pengeluaran.items() %}
+                            <tr>
+                                <td>{{ kategori }}</td>
+                                <td class="text-end">{{ "{:,.0f}".format(jumlah) }}</td>
+                                <td class="text-end">
+                                    {% if total_pengeluaran > 0 %}
+                                    {{ "{:.2f}".format((jumlah / total_pengeluaran) * 100) }}%
+                                    {% else %}
+                                    0.00%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not kategori_pengeluaran %}
+                            <tr>
+                                <td colspan="3" class="text-center">Tidak ada data pengeluaran untuk periode ini.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-danger">
+                                <th>Total</th>
+                                <th class="text-end">{{ "{:,.0f}".format(total_pengeluaran) }}</th>
+                                <th class="text-end">100.00%</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Daftar Transaksi -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4><i class="fas fa-list me-2"></i>Daftar Transaksi</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Jenis</th>
+                        <th>Kategori</th>
+                        <th>Deskripsi</th>
+                        <th class="text-end">Jumlah (Rp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cashflow_data %}
+                    <tr>
+                        <td>{{ format_datetime(item.tanggal, '%d-%m-%Y') }}</td>
+                        <td>
+                            {% if item.jenis == 'pemasukan' %}
+                            <span class="badge bg-success">Pemasukan</span>
+                            {% else %}
+                            <span class="badge bg-danger">Pengeluaran</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.kategori }}</td>
+                        <td>{{ item.deskripsi or '-' }}</td>
+                        <td class="text-end">{{ "{:,.0f}".format(item.jumlah) }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not cashflow_data %}
+                    <tr>
+                        <td colspan="5" class="text-center">Tidak ada data transaksi untuk periode ini.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Laporan ini menampilkan ringkasan cash flow bisnis Anda untuk periode yang dipilih.</p>
+        <ul>
+            <li><strong>Pemasukan:</strong> Total uang yang masuk ke bisnis Anda.</li>
+            <li><strong>Pengeluaran:</strong> Total uang yang keluar dari bisnis Anda.</li>
+            <li><strong>Saldo:</strong> Selisih antara pemasukan dan pengeluaran.</li>
+        </ul>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Tips:</strong> Gunakan laporan ini untuk menganalisis pola pemasukan dan pengeluaran bisnis Anda, serta mengidentifikasi area yang memerlukan perhatian khusus.
+        </div>
+    </div>
+</div>
+
+<!-- Script untuk Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data untuk grafik pie
+    const pieData = {
+        labels: ['Pemasukan', 'Pengeluaran'],
+        datasets: [{
+            data: [{{ total_pemasukan }}, {{ total_pengeluaran }}],
+            backgroundColor: [
+                'rgba(76, 201, 240, 0.7)',
+                'rgba(247, 37, 133, 0.7)'
+            ],
+            borderColor: [
+                'rgba(76, 201, 240, 1)',
+                'rgba(247, 37, 133, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    // Data untuk grafik bar
+    const barData = {
+        labels: {{ chart_data.labels|tojson }},
+        datasets: [
+            {
+                label: 'Pemasukan',
+                data: {{ chart_data.pemasukan|tojson }},
+                backgroundColor: 'rgba(76, 201, 240, 0.7)',
+                borderColor: 'rgba(76, 201, 240, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Pengeluaran',
+                data: {{ chart_data.pengeluaran|tojson }},
+                backgroundColor: 'rgba(247, 37, 133, 0.7)',
+                borderColor: 'rgba(247, 37, 133, 1)',
+                borderWidth: 1
+            }
+        ]
+    };
+    
+    // Render grafik pie
+    const cashflowPieChart = new Chart(
+        document.getElementById('cashflowPieChart'),
+        {
+            type: 'pie',
+            data: pieData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Perbandingan Pemasukan vs Pengeluaran'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += 'Rp.' + context.raw.toLocaleString('id-ID');
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+    
+    // Render grafik bar
+    const cashflowBarChart = new Chart(
+        document.getElementById('cashflowBarChart'),
+        {
+            type: 'bar',
+            data: barData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Pemasukan dan Pengeluaran per Kategori'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += 'Rp.' + context.raw.toLocaleString('id-ID');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp.' + value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+</script>
+{% endblock %}

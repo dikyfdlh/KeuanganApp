@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-box me-2"></i>Manajemen Produk</h2>
+
+<div class="form-container">
+    <h4 class="form-title"><i class="fas fa-plus-circle me-2"></i>Tambah Produk Baru</h4>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Kode Produk</label>
+                <input type="text" name="kode" class="form-control" placeholder="Kode produk" required>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label class="form-label">Nama Produk</label>
+                <input type="text" name="nama" class="form-control" placeholder="Nama produk" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Deskripsi</label>
+            <textarea name="deskripsi" class="form-control" rows="3" placeholder="Deskripsi produk"></textarea>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Harga Beli (Rp)</label>
+                <input type="number" name="harga_beli" class="form-control" placeholder="Harga beli" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Harga Jual (Rp)</label>
+                <input type="number" name="harga_jual" class="form-control" placeholder="Harga jual" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Stok</label>
+                <input type="number" name="stok" class="form-control" placeholder="Jumlah stok" value="0" min="0">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Kategori</label>
+            <input type="text" name="kategori" class="form-control" placeholder="Kategori produk">
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Tambah Produk
+        </button>
+    </form>
+</div>
+
+<div class="table-container">
+    <h4 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Produk</h4>
+    
+    <!-- Filter dan Pencarian -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Cari produk...">
+                <button class="btn btn-primary" type="button" id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-end">
+                <select id="categoryFilter" class="form-control" style="max-width: 200px;">
+                    <option value="">Semua Kategori</option>
+                    <!-- Kategori akan diisi dengan JavaScript -->
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover" id="productTable">
+            <thead>
+                <tr>
+                    <th>Kode</th>
+                    <th>Nama</th>
+                    <th>Harga Beli</th>
+                    <th>Harga Jual</th>
+                    <th>Profit</th>
+                    <th>Stok</th>
+                    <th>Kategori</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produk in produk_list %}
+                <tr>
+                    <td>{{ produk.kode }}</td>
+                    <td>{{ produk.nama }}</td>
+                    <td>Rp.{{ "{:,.0f}".format(produk.harga_beli) }}</td>
+                    <td>Rp.{{ "{:,.0f}".format(produk.harga_jual) }}</td>
+                    <td>Rp.{{ "{:,.0f}".format(produk.profit()) }} ({{ "{:.1f}".format(produk.profit_percentage()) }}%)</td>
+                    <td>{{ produk.stok }}</td>
+                    <td>{{ produk.kategori or '-' }}</td>
+                    <td>
+                        <a href="{{ url_for('main.edit_produk', id=produk.id) }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <a href="{{ url_for('main.hapus_produk', id=produk.id) }}" class="btn btn-danger btn-sm" 
+                           onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">
+                            <i class="fas fa-trash me-1"></i> Hapus
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Halaman ini digunakan untuk mengelola produk yang dijual.</p>
+        <ul>
+            <li><strong>Kode Produk:</strong> Kode unik untuk mengidentifikasi produk.</li>
+            <li><strong>Harga Beli:</strong> Harga modal atau harga pembelian produk.</li>
+            <li><strong>Harga Jual:</strong> Harga jual produk kepada pelanggan.</li>
+            <li><strong>Profit:</strong> Selisih antara harga jual dan harga beli.</li>
+            <li><strong>Stok:</strong> Jumlah produk yang tersedia.</li>
+        </ul>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Tips:</strong> Pantau stok produk secara berkala untuk menghindari kehabisan stok.
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fungsi untuk filter dan pencarian
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const productTable = document.getElementById('productTable');
+        const tableRows = productTable.querySelectorAll('tbody tr');
+        
+        // Kumpulkan semua kategori unik
+        const categories = new Set();
+        tableRows.forEach(row => {
+            const category = row.cells[6].textContent.trim();
+            if (category && category !== '-') {
+                categories.add(category);
+            }
+        });
+        
+        // Tambahkan opsi kategori ke dropdown
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+        
+        // Fungsi filter
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            
+            tableRows.forEach(row => {
+                const name = row.cells[1].textContent.toLowerCase();
+                const code = row.cells[0].textContent.toLowerCase();
+                const category = row.cells[6].textContent.trim();
+                
+                const matchesSearch = name.includes(searchTerm) || code.includes(searchTerm);
+                const matchesCategory = !selectedCategory || category === selectedCategory;
+                
+                if (matchesSearch && matchesCategory) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Event listeners
+        searchButton.addEventListener('click', filterTable);
+        searchInput.addEventListener('keyup', filterTable);
+        categoryFilter.addEventListener('change', filterTable);
+    });
+</script>
+{% endblock %}

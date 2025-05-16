@@ -1,17 +1,84 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2 class="mb-4"><i class="fas fa-box-open me-2"></i>Biaya Produk</h2>
+<h2 class="mb-4"><i class="fas fa-box-open me-2"></i>Rancangan Anggaran Biaya Produk</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi Anggaran</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Anggaran</h5>
+                        <p class="card-text fs-4">Rp.{{ "{:,.0f}".format(total_anggaran) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Realisasi</h5>
+                        <p class="card-text fs-4">Rp.{{ "{:,.0f}".format(total_realisasi) }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Selisih</h5>
+                        <p class="card-text fs-4 {% if selisih >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            Rp.{{ "{:,.0f}".format(selisih) }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Persentase Realisasi</h5>
+                        <p class="card-text fs-4 {% if persentase <= 100 %}text-success{% else %}text-danger{% endif %}">
+                            {{ "{:.1f}".format(persentase) }}%
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="form-container">
-    <h4 class="form-title"><i class="fas fa-plus-circle me-2"></i>Tambah Biaya Produk</h4>
+    <h4 class="form-title"><i class="fas fa-plus-circle me-2"></i>Tambah Rancangan Anggaran Biaya Produk</h4>
     <form method="POST">
-        <div class="mb-3">
-            <label class="form-label">Nama Produk</label>
-            <input type="text" name="nama" class="form-control" placeholder="Masukkan nama produk" required>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nama Produk/Biaya</label>
+                <input type="text" name="nama" class="form-control" placeholder="Masukkan nama produk/biaya" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Anggaran (Rp)</label>
+                <input type="number" name="anggaran" class="form-control" placeholder="Masukkan anggaran" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Realisasi (Rp)</label>
+                <input type="number" name="jumlah" class="form-control" placeholder="Masukkan realisasi" required>
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Harga (Rp)</label>
-            <input type="number" name="jumlah" class="form-control" placeholder="Masukkan harga" required>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Periode</label>
+                <select name="periode" class="form-control" required>
+                    <option value="bulanan">Bulanan</option>
+                    <option value="triwulan">Triwulan</option>
+                    <option value="semester">Semester</option>
+                    <option value="tahunan">Tahunan</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Keterangan</label>
+                <input type="text" name="keterangan" class="form-control" placeholder="Masukkan keterangan (opsional)">
+            </div>
         </div>
         <button type="submit" class="btn btn-primary">
             <i class="fas fa-plus me-2"></i>Tambah
@@ -20,34 +87,71 @@
 </div>
 
 <div class="table-container">
-    <h4 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Biaya Produk</h4>
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th><i class="fas fa-tag me-1"></i> Nama</th>
-                <th><i class="fas fa-money-bill me-1"></i> Harga (Rp)</th>
-                <th><i class="fas fa-user me-1"></i> Oleh</th>
-                <th><i class="fas fa-cogs me-1"></i> Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in data %}
-            <tr>
-                <td>{{ item.nama }}</td>
-                <td>{{ "{:,.0f}".format(item.jumlah) }}</td>
-                <td>{{ session.get('namalengkap') }}</td>
-                <td>
-                    <a href="{{ url_for('main.editBiayaTTP', id=item.id) }}" class="btn btn-warning btn-sm">
-                        <i class="fas fa-edit me-1"></i> Edit
-                    </a>
-                    <a href="{{ url_for('main.hapusBiayaTTP', id=item.id) }}" class="btn btn-danger btn-sm" 
-                       onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">
-                        <i class="fas fa-trash me-1"></i> Hapus
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h4 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Rancangan Anggaran Biaya Produk</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-tag me-1"></i> Nama</th>
+                    <th><i class="fas fa-money-bill me-1"></i> Anggaran (Rp)</th>
+                    <th><i class="fas fa-money-bill me-1"></i> Realisasi (Rp)</th>
+                    <th><i class="fas fa-percentage me-1"></i> % Realisasi</th>
+                    <th><i class="fas fa-calendar me-1"></i> Periode</th>
+                    <th><i class="fas fa-info-circle me-1"></i> Keterangan</th>
+                    <th><i class="fas fa-cogs me-1"></i> Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td>{{ item.nama }}</td>
+                    <td>{{ "{:,.0f}".format(item.anggaran) }}</td>
+                    <td>{{ "{:,.0f}".format(item.jumlah) }}</td>
+                    <td>
+                        {% set persentase = item.persentase_realisasi() %}
+                        <span class="{% if persentase <= 100 %}text-success{% else %}text-danger{% endif %}">
+                            {{ "{:.1f}".format(persentase) }}%
+                        </span>
+                    </td>
+                    <td>{{ item.periode|capitalize }}</td>
+                    <td>{{ item.keterangan or '-' }}</td>
+                    <td>
+                        <a href="{{ url_for('main.editBiayaTTP', id=item.id) }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <a href="{{ url_for('main.hapusBiayaTTP', id=item.id) }}" class="btn btn-danger btn-sm" 
+                           onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">
+                            <i class="fas fa-trash me-1"></i> Hapus
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not data %}
+                <tr>
+                    <td colspan="7" class="text-center">Belum ada data anggaran biaya produk.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Halaman ini digunakan untuk mengelola rancangan anggaran biaya produk bisnis Anda.</p>
+        <ul>
+            <li><strong>Anggaran:</strong> Jumlah biaya yang direncanakan untuk produk/biaya tertentu.</li>
+            <li><strong>Realisasi:</strong> Jumlah biaya aktual yang telah dikeluarkan.</li>
+            <li><strong>% Realisasi:</strong> Persentase realisasi dibandingkan dengan anggaran.</li>
+            <li><strong>Periode:</strong> Jangka waktu anggaran (bulanan, triwulan, semester, tahunan).</li>
+        </ul>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Tips:</strong> Pantau persentase realisasi untuk memastikan pengeluaran tidak melebihi anggaran yang telah ditetapkan.
+        </div>
+    </div>
 </div>
 {% endblock %}

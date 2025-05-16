@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-edit me-2"></i>Edit Menu</h2>
+
+<div class="form-container">
+    <h4 class="form-title"><i class="fas fa-pen me-2"></i>Ubah Data Menu</h4>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nama Menu</label>
+                <input type="text" name="nama" class="form-control" value="{{ menu.nama }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">URL</label>
+                <input type="text" name="url" class="form-control" value="{{ menu.url }}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Icon (Font Awesome)</label>
+                <input type="text" name="icon" class="form-control" value="{{ menu.icon }}" placeholder="Contoh: fas fa-home">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Menu Parent</label>
+                <select name="parent_id" class="form-control">
+                    <option value="">-- Tidak Ada Parent --</option>
+                    {% for parent in parent_menus %}
+                    <option value="{{ parent.id }}" {% if menu.parent_id == parent.id %}selected{% endif %}>{{ parent.nama }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Urutan</label>
+                <input type="number" name="urutan" class="form-control" value="{{ menu.urutan }}" min="0">
+            </div>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if menu.is_active %}checked{% endif %}>
+            <label class="form-check-label" for="is_active">Menu Aktif</label>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>Simpan
+            </button>
+            <a href="{{ url_for('main.manajemen_menu') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Beberapa contoh icon Font Awesome yang dapat digunakan:</p>
+        <div class="row">
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-home me-2"></i> fas fa-home
+            </div>
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-users me-2"></i> fas fa-users
+            </div>
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-cog me-2"></i> fas fa-cog
+            </div>
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-chart-bar me-2"></i> fas fa-chart-bar
+            </div>
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-shopping-cart me-2"></i> fas fa-shopping-cart
+            </div>
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-money-bill-wave me-2"></i> fas fa-money-bill-wave
+            </div>
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-box-open me-2"></i> fas fa-box-open
+            </div>
+            <div class="col-md-3 mb-2">
+                <i class="fas fa-list me-2"></i> fas fa-list
+            </div>
+        </div>
+        <p class="mt-3">Untuk melihat lebih banyak icon, kunjungi <a href="https://fontawesome.com/icons" target="_blank">Font Awesome</a>.</p>
+    </div>
+</div>
+{% endblock %}

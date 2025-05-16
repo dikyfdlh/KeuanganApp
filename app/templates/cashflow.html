@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-money-bill-transfer me-2"></i>Cash Flow</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card primary">
+            <div class="card-title">Total Pemasukan</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(total_pemasukan) }}</div>
+            <div class="card-info">
+                <i class="fas fa-arrow-up me-1"></i> Periode {{ start_date_display }} s/d {{ end_date_display }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card warning">
+            <div class="card-title">Total Pengeluaran</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(total_pengeluaran) }}</div>
+            <div class="card-info">
+                <i class="fas fa-arrow-down me-1"></i> Periode {{ start_date_display }} s/d {{ end_date_display }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card {% if saldo >= 0 %}success{% else %}danger{% endif %}">
+            <div class="card-title">Saldo</div>
+            <div class="card-value">Rp.{{ "{:,.0f}".format(saldo) }}</div>
+            <div class="card-info">
+                <i class="fas fa-balance-scale me-1"></i> Pemasukan - Pengeluaran
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Data</h4>
+                <a href="{{ url_for('main.laporan_cashflow') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-chart-pie me-1"></i> Lihat Laporan
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('main.cashflow') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal Mulai</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal Akhir</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Kategori</label>
+                        <select name="kategori" class="form-control">
+                            <option value="">Semua Kategori</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}" {% if selected_kategori == category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Jenis</label>
+                        <select name="jenis" class="form-control">
+                            <option value="">Semua</option>
+                            <option value="pemasukan" {% if selected_jenis == 'pemasukan' %}selected{% endif %}>Pemasukan</option>
+                            <option value="pengeluaran" {% if selected_jenis == 'pengeluaran' %}selected{% endif %}>Pengeluaran</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-container">
+    <h4 class="form-title"><i class="fas fa-plus-circle me-2"></i>Tambah Transaksi Cash Flow</h4>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Tanggal</label>
+                <input type="date" name="tanggal" class="form-control" value="{{ start_date }}" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Jenis</label>
+                <select name="jenis" class="form-control" required>
+                    <option value="pemasukan">Pemasukan</option>
+                    <option value="pengeluaran">Pengeluaran</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Kategori</label>
+                <input type="text" name="kategori" class="form-control" list="kategori-list" placeholder="Pilih atau ketik kategori" required>
+                <datalist id="kategori-list">
+                    {% for category in categories %}
+                    <option value="{{ category }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Jumlah (Rp)</label>
+                <input type="number" name="jumlah" class="form-control" placeholder="Masukkan jumlah" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Deskripsi</label>
+            <textarea name="deskripsi" class="form-control" rows="2" placeholder="Deskripsi transaksi"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Tambah Transaksi
+        </button>
+    </form>
+</div>
+
+<div class="table-container">
+    <h4 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Transaksi Cash Flow</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Jenis</th>
+                    <th>Kategori</th>
+                    <th>Deskripsi</th>
+                    <th>Jumlah (Rp)</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cashflow_data %}
+                <tr>
+                    <td>{{ format_datetime(item.tanggal, '%d-%m-%Y') }}</td>
+                    <td>
+                        {% if item.jenis == 'pemasukan' %}
+                        <span class="badge bg-success">Pemasukan</span>
+                        {% else %}
+                        <span class="badge bg-danger">Pengeluaran</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.kategori }}</td>
+                    <td>{{ item.deskripsi or '-' }}</td>
+                    <td class="text-end">{{ "{:,.0f}".format(item.jumlah) }}</td>
+                    <td>
+                        <a href="{{ url_for('main.edit_cashflow', id=item.id) }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <a href="{{ url_for('main.hapus_cashflow', id=item.id) }}" class="btn btn-danger btn-sm" 
+                           onclick="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
+                            <i class="fas fa-trash me-1"></i> Hapus
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not cashflow_data %}
+                <tr>
+                    <td colspan="6" class="text-center">Tidak ada data transaksi untuk periode ini.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Halaman ini digunakan untuk mencatat dan melacak arus kas (cash flow) bisnis Anda.</p>
+        <ul>
+            <li><strong>Pemasukan:</strong> Semua uang yang masuk ke bisnis Anda, seperti pendapatan penjualan, investasi, dll.</li>
+            <li><strong>Pengeluaran:</strong> Semua uang yang keluar dari bisnis Anda, seperti biaya operasional, gaji, dll.</li>
+            <li><strong>Saldo:</strong> Selisih antara total pemasukan dan total pengeluaran.</li>
+        </ul>
+        
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Tips:</strong> Gunakan kategori yang konsisten untuk memudahkan analisis keuangan bisnis Anda.
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-users me-2"></i>Manajemen Pengguna</h2>
+
+<div class="form-container">
+    <h4 class="form-title"><i class="fas fa-user-plus me-2"></i>Tambah Pengguna Baru</h4>
+    <form method="POST" action="{{ url_for('main.tambah_pengguna') }}">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" name="namalengkap" class="form-control" placeholder="Nama lengkap" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="Email" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-control">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-user-plus me-2"></i>Tambah Pengguna
+        </button>
+    </form>
+</div>
+
+<div class="table-container">
+    <h4 class="mb-3"><i class="fas fa-list me-2"></i>Daftar Pengguna</h4>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Nama Lengkap</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Tanggal Daftar</th>
+                <th>Login Terakhir</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.namalengkap }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.role == 'admin' %}
+                    <span class="badge bg-danger">Admin</span>
+                    {% else %}
+                    <span class="badge bg-primary">User</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at.strftime('%d-%m-%Y %H:%M') if user.created_at else '-' }}</td>
+                <td>{{ user.last_login.strftime('%d-%m-%Y %H:%M') if user.last_login else 'Belum pernah login' }}</td>
+                <td>
+                    <a href="{{ url_for('main.edit_pengguna', id=user.id) }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                    {% if user.id != session.get('user_id') %}
+                    <a href="{{ url_for('main.hapus_pengguna', id=user.id) }}" class="btn btn-danger btn-sm" 
+                       onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?')">
+                        <i class="fas fa-trash me-1"></i> Hapus
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Informasi</h4>
+    </div>
+    <div class="card-body">
+        <p>Halaman ini digunakan untuk mengelola pengguna aplikasi.</p>
+        <ul>
+            <li><strong>Admin:</strong> Memiliki akses ke semua fitur aplikasi, termasuk manajemen pengguna dan menu.</li>
+            <li><strong>User:</strong> Memiliki akses terbatas sesuai dengan menu yang tersedia.</li>
+        </ul>
+        
+        <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian:</strong> Anda tidak dapat menghapus akun Anda sendiri.
+        </div>
+    </div>
+</div>
+{% endblock %}
